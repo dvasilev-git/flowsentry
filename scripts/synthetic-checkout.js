@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const { pushToLoki } = require('./push-loki');
 
 async function runSyntheticFlow() {
   console.log('🛒 Starting synthetic checkout flows...');
@@ -136,9 +137,9 @@ async function runSyntheticFlow() {
     
     results.push(result);
     
-    // Push synthetic metric if credentials are available
-    if (process.env.GRAFANA_PROMETHEUS_URL && process.env.GRAFANA_API_KEY) {
-      await pushSyntheticMetric(result);
+    // Push synthetic result to Loki if credentials are available
+    if (process.env.GRAFANA_LOKI_URL && process.env.GRAFANA_API_KEY) {
+      await pushToLoki([result], 'synthetic');
     }
   }
   
@@ -155,44 +156,6 @@ async function runSyntheticFlow() {
   return results;
 }
 
-async function pushSyntheticMetric(result) {
-  const axios = require('axios');
-  
-  const payload = {
-    streams: [{
-      stream: { 
-        job: 'flowsentry-synthetic',
-        __name__: 'synthetic_flow_success'
-      },
-      values: [[
-        (Date.now()).toString(),
-        result.success ? '1' : '0'
-      ]]
-    }, {
-      stream: { 
-        job: 'flowsentry-synthetic',
-        __name__: 'synthetic_flow_duration'
-      },
-      values: [[
-        (Date.now()).toString(),
-        result.duration.toString()
-      ]]
-    }]
-  };
-
-  try {
-    await axios.post(process.env.GRAFANA_PROMETHEUS_URL, payload, {
-      headers: {
-        'Authorization': `Bearer ${process.env.GRAFANA_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 10000
-    });
-    console.log('✅ Synthetic metrics pushed successfully');
-  } catch (error) {
-    console.error('❌ Failed to push synthetic metrics:', error.message);
-  }
-}
 
 // Run if called directly
 if (require.main === module) {
@@ -209,4 +172,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { runSyntheticFlow, pushSyntheticMetric };
+module.exports = { runSyntheticFlow };

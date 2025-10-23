@@ -24,7 +24,8 @@ jobs:
       - name: Run synthetic flows
         env:
           GRAFANA_API_KEY: ${{ secrets.GRAFANA_API_KEY }}
-          GRAFANA_PROMETHEUS_URL: ${{ secrets.GRAFANA_PROMETHEUS_URL }}
+          GRAFANA_LOKI_URL: ${{ secrets.GRAFANA_LOKI_URL }}
+          GRAFANA_LOKI_USER: ${{ secrets.GRAFANA_LOKI_USER }}
         run: npm run synthetic
       
       - name: Upload failure screenshots

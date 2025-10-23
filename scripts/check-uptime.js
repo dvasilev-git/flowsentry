@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
-const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const { pushToLoki } = require('./push-loki');
 
 async function checkUptime() {
   console.log('🔍 Starting uptime checks...');
@@ -76,11 +76,11 @@ async function checkUptime() {
   console.log(`\n📈 Results: ${results.filter(r => r.success).length}/${results.length} successful`);
   
   // Push to Grafana Cloud if credentials are available
-  if (process.env.GRAFANA_PROMETHEUS_URL && process.env.GRAFANA_API_KEY) {
-    await pushMetrics(results);
+  if (process.env.GRAFANA_LOKI_URL && process.env.GRAFANA_API_KEY) {
+    await pushToLoki(results, 'uptime');
   } else {
-    console.log('⚠️  Grafana credentials not found, skipping metrics push');
-    console.log('   Set GRAFANA_PROMETHEUS_URL and GRAFANA_API_KEY environment variables');
+    console.log('⚠️  Grafana Loki credentials not found, skipping logs push');
+    console.log('   Set GRAFANA_LOKI_URL, GRAFANA_LOKI_USER and GRAFANA_API_KEY environment variables');
   }
   
   // Save results to file for debugging
@@ -94,65 +94,6 @@ async function checkUptime() {
   return results;
 }
 
-async function pushMetrics(results) {
-  console.log('📤 Pushing metrics to Grafana Cloud...');
-  
-  const metrics = results.map(result => ({
-    name: 'website_uptime',
-    value: result.success ? 1 : 0,
-    labels: {
-      client: result.client,
-      url: result.url,
-      domain: result.domain
-    },
-    timestamp: Math.floor(Date.now() / 1000)
-  }));
-
-  const responseTimeMetrics = results.map(result => ({
-    name: 'website_response_time',
-    value: result.responseTime,
-    labels: {
-      client: result.client,
-      url: result.url,
-      domain: result.domain
-    },
-    timestamp: Math.floor(Date.now() / 1000)
-  }));
-
-  // Format for Prometheus remote write
-  const payload = {
-    streams: [{
-      stream: { 
-        job: 'flowsentry',
-        __name__: 'website_uptime'
-      },
-      values: [...metrics, ...responseTimeMetrics].map(m => [
-        (m.timestamp * 1000).toString(), // Convert to milliseconds
-        m.value.toString()
-      ])
-    }]
-  };
-
-  try {
-    const response = await axios.post(process.env.GRAFANA_PROMETHEUS_URL, payload, {
-      headers: {
-        'Authorization': `Bearer ${process.env.GRAFANA_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 10000
-    });
-    
-    console.log('✅ Metrics pushed successfully');
-    return true;
-  } catch (error) {
-    console.error('❌ Failed to push metrics:', error.message);
-    if (error.response) {
-      console.error('Response status:', error.response.status);
-      console.error('Response data:', error.response.data);
-    }
-    return false;
-  }
-}
 
 // Run if called directly
 if (require.main === module) {
@@ -170,4 +111,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { checkUptime, pushMetrics };
+module.exports = { checkUptime };

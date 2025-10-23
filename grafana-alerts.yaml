@@ -1,0 +1,60 @@
+# Grafana Alert Rules for FlowSentry Monitoring
+# Import these into Grafana Cloud → Alerting → Alert Rules
+
+groups:
+  - name: flowsentry-uptime
+    rules:
+      - alert: WebsiteDown
+        expr: |
+          (
+            sum(rate({job="flowsentry",kind="uptime"} | json | success=0 [5m])) by (client, url)
+            /
+            sum(rate({job="flowsentry",kind="uptime"} | json [5m])) by (client, url)
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          service: flowsentry
+        annotations:
+          summary: "Website {{ $labels.client }} - {{ $labels.url }} is down"
+          description: "{{ $labels.client }} - {{ $labels.url }} has been failing for more than 5 minutes"
+          runbook_url: "https://github.com/dvasilev-git/flowsentry/blob/main/SETUP.md#troubleshooting"
+
+      - alert: SlowResponse
+        expr: |
+          avg_over_time({job="flowsentry",kind="uptime"} | json | unwrap responseTime [10m]) by (client, url) > 5000
+        for: 10m
+        labels:
+          severity: warning
+          service: flowsentry
+        annotations:
+          summary: "Website {{ $labels.client }} - {{ $labels.url }} is slow"
+          description: "{{ $labels.client }} - {{ $labels.url }} response time is above 5 seconds for 10 minutes"
+
+  - name: flowsentry-synthetic
+    rules:
+      - alert: SyntheticFlowFailing
+        expr: |
+          (
+            sum(rate({job="flowsentry",kind="synthetic"} | json | success=0 [1h])) by (client)
+            /
+            sum(rate({job="flowsentry",kind="synthetic"} | json [1h])) by (client)
+          ) > 0.2
+        for: 15m
+        labels:
+          severity: critical
+          service: flowsentry
+        annotations:
+          summary: "Synthetic flow failing for {{ $labels.client }}"
+          description: "{{ $labels.client }} synthetic checkout flow has been failing for more than 15 minutes"
+
+      - alert: SyntheticFlowSlow
+        expr: |
+          quantile_over_time(0.95, {job="flowsentry",kind="synthetic"} | json | unwrap duration [1h]) by (client) > 30000
+        for: 30m
+        labels:
+          severity: warning
+          service: flowsentry
+        annotations:
+          summary: "Synthetic flow slow for {{ $labels.client }}"
+          description: "{{ $labels.client }} synthetic flow 95th percentile is above 30 seconds for 30 minutes"
