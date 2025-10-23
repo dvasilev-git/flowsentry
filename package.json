@@ -11,7 +11,7 @@
     "test": "node scripts/test-setup.js"
   },
   "dependencies": {
-    "puppeteer": "^21.0.0",
+    "puppeteer": "^22.0.0",
     "axios": "^1.6.0",
     "@lhci/cli": "^0.12.0"
   },
