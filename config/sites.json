@@ -1,0 +1,40 @@
+{
+  "sites": [
+    {
+      "client": "demo-client-1",
+      "domain": "example.com",
+      "urls": [
+        { "name": "homepage", "path": "/" },
+        { "name": "checkout", "path": "/checkout" }
+      ],
+      "synthetic": {
+        "enabled": true,
+        "type": "checkout",
+        "selectors": {
+          "product_link": "a[href*='/product']",
+          "add_to_cart": ".add-to-cart",
+          "proceed_checkout": ".checkout-btn"
+        }
+      },
+      "lighthouse": {
+        "pages": ["/", "/products/demo", "/blog"]
+      }
+    },
+    {
+      "client": "demo-client-2",
+      "domain": "httpbin.org",
+      "urls": [
+        { "name": "homepage", "path": "/" },
+        { "name": "status", "path": "/status/200" }
+      ],
+      "synthetic": {
+        "enabled": false,
+        "type": "simple",
+        "selectors": {}
+      },
+      "lighthouse": {
+        "pages": ["/", "/status/200", "/json"]
+      }
+    }
+  ]
+}

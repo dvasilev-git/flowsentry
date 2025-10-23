@@ -1,0 +1,46 @@
+name: Lighthouse Daily
+on:
+  schedule:
+    - cron: '30 3 * * *'  # Daily at 3:30 AM UTC
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run Lighthouse for Demo Client 1
+        run: |
+          lhci autorun \
+            --collect.url=https://example.com/ \
+            --collect.url=https://example.com/products/demo \
+            --collect.url=https://example.com/blog \
+            --upload.target=filesystem \
+            --upload.outputDir=./lhci-artifacts/demo-client-1/$(date +%F)
+      
+      - name: Run Lighthouse for Demo Client 2
+        run: |
+          lhci autorun \
+            --collect.url=https://httpbin.org/ \
+            --collect.url=https://httpbin.org/status/200 \
+            --collect.url=https://httpbin.org/json \
+            --upload.target=filesystem \
+            --upload.outputDir=./lhci-artifacts/demo-client-2/$(date +%F)
+      
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-results-${{ github.run_number }}
+          path: lhci-artifacts/
+          retention-days: 30
