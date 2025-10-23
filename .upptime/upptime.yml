@@ -1,6 +1,9 @@
-owner: dvasilev-git  # Your GitHub username
-repo: flowsentry  # Your repository name
-status-website: https://dvasilev-git.github.io/flowsentry  # Your GitHub Pages URL
+# Upptime disabled - using Grafana public dashboard instead
+# Uncomment below if you make the repo public
+
+# owner: yourusername
+# repo: flowsentry
+# status-website: https://yourusername.github.io/flowsentry
 
 # Sites to monitor
 sites:
@@ -15,33 +18,23 @@ sites:
 
 # Configuration
 assignees:
-  - dvasilev-git  # Your GitHub username
+  - yourusername
 
 # Notification settings
 notifications:
   - type: email
     email: your-email@example.com  # Replace with your email
-  - type: slack
-    webhook: ${{ secrets.SLACK_WEBHOOK }}  # Optional: set up Slack webhook
 
 # Uptime settings
 uptime:
-  # Check every 5 minutes
   interval: 5
-  # Retry failed checks after 1 minute
   retry: 1
-  # Timeout after 30 seconds
   timeout: 30
-  # User agent for requests
-  userAgent: 'Mozilla/5.0 (compatible; FlowSentry/1.0; +https://github.com/yourusername/flowsentry-monitoring)'
+  userAgent: 'Mozilla/5.0 (compatible; FlowSentry/1.0; +https://github.com/yourusername/flowsentry)'
 
 # Status page settings
 statusPage:
-  # Show response time graphs
   showResponseTime: true
-  # Show uptime percentage
   showUptime: true
-  # Show incident history
   showIncidents: true
-  # Show response time history
   showResponseTimeHistory: true

@@ -23,7 +23,7 @@ async function runSyntheticFlow() {
     const page = await browser.newPage();
     
     // Set user agent to avoid bot detection
-    await page.setUserAgent('Mozilla/5.0 (compatible; FlowSentry/1.0; +https://github.com/yourusername/flowsentry-monitoring)');
+    await page.setUserAgent('Mozilla/5.0 (compatible; FlowSentry/1.0; +https://github.com/yourusername/flowsentry)');
     
     const startTime = Date.now();
     let success = false;

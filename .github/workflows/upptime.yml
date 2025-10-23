@@ -1,20 +1,23 @@
-name: Upptime
-on:
-  schedule:
-    - cron: '*/5 * * * *'  # Every 5 minutes
-  workflow_dispatch:
+# Upptime workflow disabled - using Grafana public dashboard instead
+# Uncomment below if you make the repo public
 
-jobs:
-  upptime:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Setup Upptime
-        uses: upptime/upptime@master
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONFIG_FILE: .upptime/upptime.yml
+# name: Upptime
+# on:
+#   schedule:
+#     - cron: '*/5 * * * *'  # Every 5 minutes
+#   workflow_dispatch:
+
+# jobs:
+#   upptime:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#         with:
+#           token: ${{ secrets.GITHUB_TOKEN }}
+#       
+#       - name: Setup Upptime
+#         uses: upptime/upptime@master
+#         with:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           CONFIG_FILE: .upptime/upptime.yml
