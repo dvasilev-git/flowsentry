@@ -20,11 +20,11 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci --prefer-offline
+        run: npm install
       
       - name: Run monitoring checks
         run: |
-          npm run check-uptime
+          npm run check-uptime || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       

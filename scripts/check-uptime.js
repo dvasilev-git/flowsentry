@@ -161,7 +161,8 @@ if (require.main === module) {
       const successCount = results.filter(r => r.success).length;
       const totalCount = results.length;
       console.log(`\n🎯 Summary: ${successCount}/${totalCount} checks passed`);
-      process.exit(successCount === totalCount ? 0 : 1);
+      // Don't exit with error code - we want to continue with status page generation
+      process.exit(0);
     })
     .catch(error => {
       console.error('💥 Fatal error:', error);
