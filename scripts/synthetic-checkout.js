@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
-const { pushToLoki } = require('./push-loki');
+const { pushToPrometheus } = require('./push-prometheus');
 
 async function runSyntheticFlow() {
   console.log('🛒 Starting synthetic checkout flows...');
@@ -137,9 +137,9 @@ async function runSyntheticFlow() {
     
     results.push(result);
     
-    // Push synthetic result to Loki if credentials are available
-    if (process.env.GRAFANA_LOKI_URL && process.env.GRAFANA_API_KEY) {
-      await pushToLoki([result], 'synthetic');
+    // Push synthetic result to Prometheus if credentials are available
+    if (process.env.GRAFANA_PROMETHEUS_URL && process.env.GRAFANA_API_KEY) {
+      await pushToPrometheus([result], 'synthetic');
     }
   }
   

@@ -1,4 +1,4 @@
-# Grafana Alert Rules for FlowSentry Monitoring
+# Grafana Alert Rules for FlowSentry Monitoring (Prometheus)
 # Import these into Grafana Cloud → Alerting → Alert Rules
 
 groups:
@@ -6,11 +6,7 @@ groups:
     rules:
       - alert: WebsiteDown
         expr: |
-          (
-            sum(rate({job="flowsentry",kind="uptime"} | json | success=0 [5m])) by (client, url)
-            /
-            sum(rate({job="flowsentry",kind="uptime"} | json [5m])) by (client, url)
-          ) > 0.1
+          flowsentry_uptime_status == 0
         for: 5m
         labels:
           severity: critical
@@ -22,7 +18,7 @@ groups:
 
       - alert: SlowResponse
         expr: |
-          avg_over_time({job="flowsentry",kind="uptime"} | json | unwrap responseTime [10m]) by (client, url) > 5000
+          flowsentry_response_time_seconds > 5
         for: 10m
         labels:
           severity: warning
@@ -31,30 +27,91 @@ groups:
           summary: "Website {{ $labels.client }} - {{ $labels.url }} is slow"
           description: "{{ $labels.client }} - {{ $labels.url }} response time is above 5 seconds for 10 minutes"
 
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(flowsentry_checks_total{status="failure"}[5m])) by (client, url)
+            /
+            sum(rate(flowsentry_checks_total[5m])) by (client, url)
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          service: flowsentry
+        annotations:
+          summary: "High error rate for {{ $labels.client }} - {{ $labels.url }}"
+          description: "{{ $labels.client }} - {{ $labels.url }} has error rate above 10% for 5 minutes"
+
+      - alert: HTTPStatusError
+        expr: |
+          flowsentry_http_status_code >= 400
+        for: 2m
+        labels:
+          severity: warning
+          service: flowsentry
+        annotations:
+          summary: "HTTP error for {{ $labels.client }} - {{ $labels.url }}"
+          description: "{{ $labels.client }} - {{ $labels.url }} returned HTTP {{ $value }}"
+
   - name: flowsentry-synthetic
     rules:
       - alert: SyntheticFlowFailing
         expr: |
-          (
-            sum(rate({job="flowsentry",kind="synthetic"} | json | success=0 [1h])) by (client)
-            /
-            sum(rate({job="flowsentry",kind="synthetic"} | json [1h])) by (client)
-          ) > 0.2
+          flowsentry_synthetic_success == 0
         for: 15m
         labels:
           severity: critical
           service: flowsentry
         annotations:
           summary: "Synthetic flow failing for {{ $labels.client }}"
-          description: "{{ $labels.client }} synthetic checkout flow has been failing for more than 15 minutes"
+          description: "{{ $labels.client }} synthetic {{ $labels.flow }} flow has been failing for more than 15 minutes"
 
       - alert: SyntheticFlowSlow
         expr: |
-          quantile_over_time(0.95, {job="flowsentry",kind="synthetic"} | json | unwrap duration [1h]) by (client) > 30000
+          flowsentry_synthetic_duration_seconds > 30
         for: 30m
         labels:
           severity: warning
           service: flowsentry
         annotations:
           summary: "Synthetic flow slow for {{ $labels.client }}"
-          description: "{{ $labels.client }} synthetic flow 95th percentile is above 30 seconds for 30 minutes"
+          description: "{{ $labels.client }} synthetic {{ $labels.flow }} flow is taking more than 30 seconds"
+
+      - alert: SyntheticFlowHighFailureRate
+        expr: |
+          (
+            sum(rate(flowsentry_synthetic_flows_total{status="failure"}[1h])) by (client, flow)
+            /
+            sum(rate(flowsentry_synthetic_flows_total[1h])) by (client, flow)
+          ) > 0.2
+        for: 15m
+        labels:
+          severity: critical
+          service: flowsentry
+        annotations:
+          summary: "High synthetic flow failure rate for {{ $labels.client }}"
+          description: "{{ $labels.client }} synthetic {{ $labels.flow }} flow has failure rate above 20% for 15 minutes"
+
+  - name: flowsentry-availability
+    rules:
+      - alert: LowUptime
+        expr: |
+          avg by (client) (flowsentry_uptime_status) < 0.95
+        for: 10m
+        labels:
+          severity: critical
+          service: flowsentry
+        annotations:
+          summary: "Low uptime for {{ $labels.client }}"
+          description: "{{ $labels.client }} uptime is below 95% for 10 minutes"
+
+      - alert: DegradedUptime
+        expr: |
+          avg by (client) (flowsentry_uptime_status) < 0.99
+        for: 30m
+        labels:
+          severity: warning
+          service: flowsentry
+        annotations:
+          summary: "Degraded uptime for {{ $labels.client }}"
+          description: "{{ $labels.client }} uptime is below 99% for 30 minutes"

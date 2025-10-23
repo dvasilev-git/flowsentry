@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
-const { pushToLoki } = require('./push-loki');
+const { pushToPrometheus } = require('./push-prometheus');
 
 async function checkUptime() {
   console.log('🔍 Starting uptime checks...');
@@ -76,11 +76,11 @@ async function checkUptime() {
   console.log(`\n📈 Results: ${results.filter(r => r.success).length}/${results.length} successful`);
   
   // Push to Grafana Cloud if credentials are available
-  if (process.env.GRAFANA_LOKI_URL && process.env.GRAFANA_API_KEY) {
-    await pushToLoki(results, 'uptime');
+  if (process.env.GRAFANA_PROMETHEUS_URL && process.env.GRAFANA_API_KEY) {
+    await pushToPrometheus(results, 'uptime');
   } else {
-    console.log('⚠️  Grafana Loki credentials not found, skipping logs push');
-    console.log('   Set GRAFANA_LOKI_URL, GRAFANA_LOKI_USER and GRAFANA_API_KEY environment variables');
+    console.log('⚠️  Grafana Prometheus credentials not found, skipping metrics push');
+    console.log('   Set GRAFANA_PROMETHEUS_URL, GRAFANA_PROMETHEUS_USER and GRAFANA_API_KEY environment variables');
   }
   
   // Save results to file for debugging

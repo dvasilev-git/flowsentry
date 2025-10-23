@@ -1,6 +1,6 @@
-# Grafana Cloud Setup for FlowSentry
+# Grafana Cloud Setup for FlowSentry (Prometheus)
 
-This guide will help you set up Grafana Cloud integration for your FlowSentry monitoring system.
+This guide will help you set up Grafana Cloud integration for your FlowSentry monitoring system using Prometheus metrics.
 
 ## 🎯 What You'll Get
 
@@ -8,6 +8,7 @@ This guide will help you set up Grafana Cloud integration for your FlowSentry mo
 - **🚨 Smart alerts** when websites go down or become slow
 - **📈 Historical data** to track trends and performance over time
 - **📧 Email notifications** for critical issues
+- **⚡ Fast queries** with PromQL for better performance
 
 ## 📋 Prerequisites
 
@@ -20,10 +21,10 @@ This guide will help you set up Grafana Cloud integration for your FlowSentry mo
 ### Step 1: Get Grafana Cloud Credentials
 
 1. **Sign up** at [grafana.com](https://grafana.com) (free tier)
-2. **Go to**: Your Grafana Cloud instance → "Send logs"
+2. **Go to**: Your Grafana Cloud instance → "Send metrics"
 3. **Copy these values**:
-   - **Loki URL**: `https://logs-xxx.grafana.net/loki/api/v1/push`
-   - **Username**: Your logs username (usually your instance ID)
+   - **Prometheus URL**: `https://prometheus-xxx.grafana.net/api/prom/push`
+   - **Username**: Your Prometheus username (usually your instance ID)
    - **API Key**: Go to "My Account" → "Security" → "Service Accounts" → Create new with "Editor" role
 
 ### Step 2: Add GitHub Secrets
@@ -32,14 +33,14 @@ Go to your GitHub repository → Settings → Secrets and variables → Actions
 
 Add these secrets:
 - `GRAFANA_API_KEY` = Your API key from Step 1
-- `GRAFANA_LOKI_URL` = Your Loki URL from Step 1  
-- `GRAFANA_LOKI_USER` = Your Loki username from Step 1
+- `GRAFANA_PROMETHEUS_URL` = Your Prometheus URL from Step 1  
+- `GRAFANA_PROMETHEUS_USER` = Your Prometheus username from Step 1
 
 ### Step 3: Import Dashboard
 
 1. **Go to**: Your Grafana Cloud instance → Dashboards → Import
 2. **Upload**: `grafana-dashboard.json` from this repository
-3. **Configure**: Set the data source to your Loki instance
+3. **Configure**: Set the data source to your Prometheus instance
 4. **Save**: The dashboard will show your monitoring data
 
 ### Step 4: Set Up Alerts
@@ -76,48 +77,79 @@ Your dashboard will include:
 ## 🚨 Alert Rules
 
 ### **Website Down Alert**
-- **Trigger**: When uptime drops below 90% for 5 minutes
+- **Trigger**: When `flowsentry_uptime_status == 0` for 5 minutes
 - **Severity**: Critical
 - **Action**: Immediate email notification
 
 ### **Slow Response Alert**
-- **Trigger**: When response time exceeds 5 seconds for 10 minutes
+- **Trigger**: When `flowsentry_response_time_seconds > 5` for 10 minutes
+- **Severity**: Warning
+- **Action**: Email notification
+
+### **High Error Rate Alert**
+- **Trigger**: When error rate >10% for 5 minutes
+- **Severity**: Critical
+- **Action**: Immediate email notification
+
+### **HTTP Status Error Alert**
+- **Trigger**: When `flowsentry_http_status_code >= 400` for 2 minutes
 - **Severity**: Warning
 - **Action**: Email notification
 
 ### **Synthetic Flow Failing**
-- **Trigger**: When synthetic checkout flow fails >20% for 15 minutes
+- **Trigger**: When `flowsentry_synthetic_success == 0` for 15 minutes
 - **Severity**: Critical
 - **Action**: Immediate email notification
 
 ### **Synthetic Flow Slow**
-- **Trigger**: When 95th percentile response time >30 seconds for 30 minutes
+- **Trigger**: When `flowsentry_synthetic_duration_seconds > 30` for 30 minutes
 - **Severity**: Warning
 - **Action**: Email notification
 
-## 🔧 LogQL Queries
+### **Low Uptime Alert**
+- **Trigger**: When average uptime <95% for 10 minutes
+- **Severity**: Critical
+- **Action**: Immediate email notification
 
-You can use these LogQL queries in Grafana to create custom panels:
+### **Degraded Uptime Alert**
+- **Trigger**: When average uptime <99% for 30 minutes
+- **Severity**: Warning
+- **Action**: Email notification
+
+## 🔧 PromQL Queries
+
+You can use these PromQL queries in Grafana to create custom panels:
 
 ### **Uptime Percentage**
-```logql
-sum(rate({job="flowsentry",kind="uptime"} | json | success=1 [5m])) / 
-sum(rate({job="flowsentry",kind="uptime"} | json [5m])) * 100
+```promql
+avg(flowsentry_uptime_status) * 100
 ```
 
 ### **Response Time by Client**
-```logql
-avg_over_time({job="flowsentry",kind="uptime"} | json | unwrap responseTime [5m]) by (client, url)
+```promql
+avg by (client, url) (flowsentry_response_time_seconds) * 1000
 ```
 
-### **Recent Failures**
-```logql
-{job="flowsentry",kind="uptime"} | json | success=0 | line_format "{{.client}} - {{.url}} ({{.domain}}{{.path}})"
+### **Check Success Rate**
+```promql
+sum(rate(flowsentry_checks_total{status="success"}[5m])) / 
+sum(rate(flowsentry_checks_total[5m])) * 100
 ```
 
 ### **Synthetic Flow Duration**
-```logql
-quantile_over_time(0.95, {job="flowsentry",kind="synthetic"} | json | unwrap duration [1h]) by (client)
+```promql
+avg by (client, flow) (flowsentry_synthetic_duration_seconds) * 1000
+```
+
+### **HTTP Status Codes**
+```promql
+avg by (client, url) (flowsentry_http_status_code)
+```
+
+### **Error Rate by Client**
+```promql
+sum(rate(flowsentry_checks_total{status="failure"}[5m])) by (client) / 
+sum(rate(flowsentry_checks_total[5m])) by (client) * 100
 ```
 
 ## 📧 Notification Setup
