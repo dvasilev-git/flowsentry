@@ -4,6 +4,11 @@ on:
     - cron: '*/5 * * * *'  # Every 5 minutes
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   status-page:
     runs-on: ubuntu-latest
@@ -31,6 +36,7 @@ jobs:
       - name: Generate status page
         run: |
           node scripts/generate-status-page.js
+          ls -la ./status-page/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
@@ -39,3 +45,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./status-page
+          enable_jekyll: false
+          cname: dvasilev-git.github.io
