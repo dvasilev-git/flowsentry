@@ -1,11 +1,11 @@
-name: Upptime
+name: Status Page Generator
 on:
   schedule:
     - cron: '*/5 * * * *'  # Every 5 minutes
   workflow_dispatch:
 
 jobs:
-  upptime:
+  status-page:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -13,8 +13,29 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Setup Upptime
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+      
+      - name: Run monitoring checks
         run: |
-          npx @upptime/uptime-monitor@latest
+          npm run check-uptime
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Generate status page
+        run: |
+          node scripts/generate-status-page.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./status-page
