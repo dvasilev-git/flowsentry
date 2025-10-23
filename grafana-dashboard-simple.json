@@ -1,0 +1,78 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "FlowSentry Test Dashboard",
+    "tags": ["flowsentry", "test"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Test Query - All Metrics",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "{__name__=~\"flowsentry_.*\"}",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "displayMode": "list",
+              "filterable": true
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Uptime Status (Simple)",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "flowsentry_uptime_status",
+            "legendFormat": "{{client}} - {{url}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Response Time (Simple)",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "flowsentry_response_time_seconds",
+            "legendFormat": "{{client}} - {{url}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

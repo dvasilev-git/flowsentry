@@ -96,26 +96,15 @@ async function pushToPrometheus(results, kind = 'uptime') {
     }
   }
 
-  // Format for Prometheus remote write
+  // Format for Prometheus remote write (correct format)
   const payload = {
-    streams: [{
-      stream: {
-        job: 'flowsentry',
-        kind: kind
-      },
-      values: timeSeries.map(ts => [
-        ts.value[0].toString(), // timestamp in milliseconds
-        ts.value[1] // metric value
-      ])
-    }]
+    timeSeries: timeSeries
   };
 
   try {
     await axios.post(process.env.GRAFANA_PROMETHEUS_URL, payload, {
       headers: {
-        'Content-Type': 'application/x-protobuf',
-        'Content-Encoding': 'snappy',
-        'X-Prometheus-Remote-Write-Version': '0.1.0'
+        'Content-Type': 'application/json'
       },
       auth: {
         username: process.env.GRAFANA_PROMETHEUS_USER,
