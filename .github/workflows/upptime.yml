@@ -42,15 +42,17 @@ jobs:
       
       - name: Prepare status page for deployment
         run: |
-          # Copy status page files to root for GitHub Pages
-          cp ./status-page/index.html ./index.html
-          cp ./status-page/api.json ./api.json
-          ls -la ./
+          # Create a clean directory with only status page files
+          mkdir -p ./deploy
+          cp ./status-page/index.html ./deploy/
+          cp ./status-page/api.json ./deploy/
+          echo "FlowSentry Status Page" > ./deploy/README.md
+          ls -la ./deploy/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+          publish_dir: ./deploy
           enable_jekyll: false
           cname: dvasilev-git.github.io
