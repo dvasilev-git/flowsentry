@@ -14,7 +14,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Setup Upptime
-        uses: upptime/upptime@master
-        with:
+        run: |
+          npx @upptime/uptime-monitor@latest
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CONFIG_FILE: .upptime/upptime.yml
