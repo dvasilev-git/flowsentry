@@ -143,4 +143,4 @@ This is a working specification for building a monitoring service. Feel free to:
 
 **Ready to catch website issues before your customers do?** 
 
-👉 **[Start with the POC guide](./POC-README.md)**
+👉 **[Start with the POC guide](./POC-README.md)**# Manual trigger Fri Oct 24 00:27:20 EEST 2025
