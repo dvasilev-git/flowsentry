@@ -1,9 +1,6 @@
-# Upptime disabled - using Grafana public dashboard instead
-# Uncomment below if you make the repo public
-
-# owner: yourusername
-# repo: flowsentry
-# status-website: https://yourusername.github.io/flowsentry
+owner: dvasilev-git
+repo: flowsentry
+status-website: https://dvasilev-git.github.io/flowsentry
 
 # Sites to monitor
 sites:
@@ -18,7 +15,7 @@ sites:
 
 # Configuration
 assignees:
-  - yourusername
+  - dvasilev-git
 
 # Notification settings
 notifications:
@@ -30,7 +27,7 @@ uptime:
   interval: 5
   retry: 1
   timeout: 30
-  userAgent: 'Mozilla/5.0 (compatible; FlowSentry/1.0; +https://github.com/yourusername/flowsentry)'
+  userAgent: 'Mozilla/5.0 (compatible; FlowSentry/1.0; +https://github.com/dvasilev-git/flowsentry)'
 
 # Status page settings
 statusPage:

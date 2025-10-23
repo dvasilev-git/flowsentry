@@ -26,7 +26,7 @@ async function checkUptime() {
         const page = await browser.newPage();
         
         // Set user agent to avoid bot detection
-        await page.setUserAgent('Mozilla/5.0 (compatible; FlowSentry/1.0; +https://github.com/yourusername/flowsentry)');
+        await page.setUserAgent('Mozilla/5.0 (compatible; FlowSentry/1.0; +https://github.com/dvasilev-git/flowsentry)');
         
         const response = await page.goto(fullUrl, { 
           waitUntil: 'networkidle2',
