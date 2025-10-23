@@ -1,6 +1,6 @@
-owner: yourusername  # Replace with your GitHub username
-repo: flowsentry-monitoring  # Replace with your repository name
-status-website: https://yourusername.github.io/flowsentry-monitoring  # Replace with your GitHub Pages URL
+owner: dvasilev-git  # Your GitHub username
+repo: flowsentry  # Your repository name
+status-website: https://dvasilev-git.github.io/flowsentry  # Your GitHub Pages URL
 
 # Sites to monitor
 sites:
@@ -15,7 +15,7 @@ sites:
 
 # Configuration
 assignees:
-  - yourusername  # Replace with your GitHub username
+  - dvasilev-git  # Your GitHub username
 
 # Notification settings
 notifications:
