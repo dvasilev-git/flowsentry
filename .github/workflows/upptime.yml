@@ -2,7 +2,7 @@ name: Status Page Generator
 on:
   schedule:
     - cron: '*/5 * * * *'  # Every 5 minutes
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger
 
 permissions:
   contents: write
