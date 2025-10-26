@@ -1,13 +1,13 @@
 {
   "status": "operational",
-  "timestamp": "2025-10-26T14:46:52.647Z",
+  "timestamp": "2025-10-26T14:56:23.607Z",
   "sites": [
     {
       "name": "demo-client-1",
       "domain": "example.com",
       "status": "outage",
       "uptime": "50.00%",
-      "lastCheck": "2025-10-26T14:46:45.982Z",
+      "lastCheck": "2025-10-26T14:56:17.744Z",
       "urls": [
         {
           "name": "homepage",
@@ -26,7 +26,7 @@
       "domain": "httpbin.org",
       "status": "operational",
       "uptime": "100.00%",
-      "lastCheck": "2025-10-26T14:46:49.250Z",
+      "lastCheck": "2025-10-26T14:56:21.333Z",
       "urls": [
         {
           "name": "homepage",
